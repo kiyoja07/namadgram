@@ -21,11 +21,18 @@ class Image(TimeStampedModel):
     location = models.CharField(max_length=140) # CharField에는 max_length 설정이 필수
     caption = models.TextField()
     # ForeignKey field makes Many to One Relationship between models
-    creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT, null=True)
+    creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT, null=True, related_name='images')
+
+    @property
+    def like_count(self):
+        return self.likes.all().count()
 
     # change the string representation of the model
     def __str__(self):
         return '{} - {}'.format(self.location, self.caption)
+
+    class Meta:
+        ordering = ['-created_at'] # 기본값은 오름차순으로 정렬하고 -를 붙이면 내림차순으로 정렬
 
 @python_2_unicode_compatible  # only if you need to support Python 2
 class Comment(TimeStampedModel):
