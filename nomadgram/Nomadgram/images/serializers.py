@@ -2,7 +2,7 @@ from rest_framework import serializers # To translate JSON <-> Python objects
 from . import models
 from Nomadgram.users import models as user_models
 
-
+# Serializers define the API representation.
 class LikeSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -22,14 +22,14 @@ class FeedUserSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
 
-    creator= FeedUserSerializer()
+    creator = FeedUserSerializer(read_only=True)
 
     class Meta:
         model = models.Comment
         fields = (
             'id',
             'message',
-            'creator'
+            'creator',
         )
 
 

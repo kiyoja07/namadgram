@@ -18,9 +18,11 @@ class Image(TimeStampedModel):
     """ Image Model """
 
     file = models.ImageField()
-    location = models.CharField(max_length=140) # CharField에는 max_length 설정이 필수
-    caption = models.TextField()
+    location = models.CharField(max_length=140) # CharField(): A string field, for small- to large-sized strings. max_length 설정이 필수
+    caption = models.TextField() # TextField(): A large text field
     # ForeignKey field makes Many to One Relationship between models
+    # on_delete=models.PROTECT -> ForeignKeyField가 바라보는 값이 삭제될 때 삭제가 되지않도록 ProtectedError를 발생시킨다.
+    # on_delete=models.CASCADE -> ForeignKeyField가 바라보는 값이 삭제될 때 ForeignKeyField를 포함하는 모델 인스턴스(row)도 삭제된다.
     creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT, null=True, related_name='images')
 
     @property
