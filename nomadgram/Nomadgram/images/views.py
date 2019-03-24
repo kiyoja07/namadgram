@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from . import models, serializers
 
+
 class Feed(APIView):
 
     # handle a GET request on an APIView
@@ -25,7 +26,7 @@ class Feed(APIView):
         # image.created_at의 역순으로 정렬
         sorted_list = sorted(image_list, key=lambda image: image.created_at, reverse=True)
 
-        serializer = serializers.ImageSerializer(sor    ted_list, many=True)
+        serializer = serializers.ImageSerializer(sorted_list, many=True)
 
         # Response class which allows you to return content that can be rendered into multiple content types, depending on the client request.
         return Response(serializer.data)
@@ -48,9 +49,8 @@ class LikeImage(APIView):
                 creator = user,
                 image = found_image
             )
-            preexisting_like.delete()
 
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(status=status.HTTP_304_NOT_MODIFIED)
 
         except models.Like.DoesNotExist:
             new_like = models.Like.objects.create(
@@ -60,6 +60,31 @@ class LikeImage(APIView):
             new_like.save()
 
             return Response(status=status.HTTP_201_CREATED)
+
+
+class UnlikeImage(APIView):
+
+    def delete(self, request, id, format=None):
+
+        # find the image
+        try:
+            found_image = models.Image.objects.get(id = id)
+        except models.Image.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            preexisting_like = models.Like.objects.get(
+                creator = user,
+                image = found_image
+            )
+
+            preexisting_like.delete()
+
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        except models.Like.DoesNotExist:
+
+            return Response(status=status.HTTP_304_NOT_MODIFIED)
 
 
 class CommentOnImage(APIView):
@@ -97,6 +122,8 @@ class Comment(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except models.Comment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
+
+
 
 # class ListAllImages(APIView):
 

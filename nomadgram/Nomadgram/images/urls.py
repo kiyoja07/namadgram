@@ -6,8 +6,10 @@ app_name = "images"
 # URL 경로들을 파이썬 콜백 함수들("views")로 연결
 urlpatterns = [
     path("", view=views.Feed.as_view(), name="feed"), # as_view() : Returns a callable view that takes a request and returns a response
-    path("<int:id>/likes/", view=views.LikeImage.as_view(), name="like_image"),
-    path("<int:id>/comments/", view=views.CommentOnImage.as_view(), name="comment"),
+    path("<int:id>/like/", view=views.LikeImage.as_view(), name="like_image"),
+    path("<int:id>/unlike/", view=views.UnlikeImage.as_view(), name="unlike_image"),
+    path("<int:id>/comments/", view=views.CommentOnImage.as_view(), name="comment_image"),
+    path("comments/<int:id>", view=views.Comment.as_view(), name="comment")
 ]
 
 # urlpatterns = [

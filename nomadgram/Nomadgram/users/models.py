@@ -22,8 +22,8 @@ class User(AbstractUser):
     bio = models.TextField(null = True)
     phone = models.CharField(max_length = 140, null = True)
     gender = models.CharField(max_length = 80, choices = GENDER_CHOICE, null = True)
-    follower = models.ManyToManyField('self')
-    following = models.ManyToManyField('self')
+    follower = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="followers_set") # blank=True를 추가하여 필수가 아니라, 선택필드로 지정
+    following = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="followings_set")
 
     def get_absolute_url(self):
         return reverse("users:detail", kwargs={"username": self.username})
