@@ -2,6 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from . import models, serializers
+from Nomadgram.notifications import views as notification_views
 
 
 class Feed(APIView):
@@ -57,7 +58,12 @@ class LikeImage(APIView):
                 creator = user,
                 image = found_image
             )
+
             new_like.save()
+
+            # 좋아요 완료 된 후 알림 생성
+            notification_views.create_notification(user, found_image.creator, 'like', found_image)
+
 
             return Response(status=status.HTTP_201_CREATED)
 
@@ -103,8 +109,14 @@ class CommentOnImage(APIView):
         serializer = serializers.CommentSerializer(data=request.data)
 
         if serializer.is_valid():
+            
             serializer.save(creator=user, image=found_image)
+
+            # 댓글 완료 된 후 알림 생성
+            notification_views.create_notification(user, found_image.creator, 'comment', found_image, serializer.data['message'])
+
             return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+        
         else:
             return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,6 +135,25 @@ class Comment(APIView):
         except models.Comment.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
+
+class Search(APIView):
+
+    def get(self, request, format=None):
+
+        hashtags = request.query_params.get('hashtags', None)
+
+        if hashtags is not None:
+
+            hashtags = hashtags.split(",") # string -> array
+
+            images =  models.Image.objects.filter(tags__name__in=hashtags).distinct()
+
+            serializer = serializers.CountImageSerializer(images, many=True)
+
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 # class ListAllImages(APIView):

@@ -1,6 +1,8 @@
 from django.db import models
-from Nomadgram.users import models as user_models
 from django.utils.encoding import python_2_unicode_compatible
+from Nomadgram.users import models as user_models
+from taggit.managers import TaggableManager
+
 
 @python_2_unicode_compatible  # only if you need to support Python 2
 class TimeStampedModel(models.Model):
@@ -24,10 +26,15 @@ class Image(TimeStampedModel):
     # on_delete=models.PROTECT -> ForeignKeyField가 바라보는 값이 삭제될 때 삭제가 되지않도록 ProtectedError를 발생시킨다.
     # on_delete=models.CASCADE -> ForeignKeyField가 바라보는 값이 삭제될 때 ForeignKeyField를 포함하는 모델 인스턴스(row)도 삭제된다.
     creator = models.ForeignKey(user_models.User, on_delete=models.PROTECT, null=True, related_name='images')
+    tags = TaggableManager()
 
     @property
     def like_count(self):
         return self.likes.all().count()
+
+    @property
+    def comment_count(self):
+        return self.comments.all().count()
 
     # change the string representation of the model
     def __str__(self):

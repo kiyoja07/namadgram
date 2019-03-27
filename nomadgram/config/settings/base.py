@@ -64,14 +64,16 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     'crispy_forms',
-    'allauth',
-    'allauth.account',
-    'allauth.socialaccount',
+    'allauth', # registration
+    'allauth.account', # registration
+    'allauth.socialaccount', # registration
     'rest_framework', # Rest Framework
+    'taggit', # Tags for the photos
 ]
 LOCAL_APPS = [
     'Nomadgram.users.apps.UsersAppConfig',
-    'Nomadgram.images.apps.ImagesConfig'
+    'Nomadgram.images.apps.ImagesConfig', # images app
+    'Nomadgram.notifications.apps.NotificationsConfig' # notifications app
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -250,3 +252,4 @@ SOCIALACCOUNT_ADAPTER = 'Nomadgram.users.adapters.SocialAccountAdapter'
 
 # Your stuff...
 # ------------------------------------------------------------------------------
+TAGGIT_CASE_INSENSITIVE = True

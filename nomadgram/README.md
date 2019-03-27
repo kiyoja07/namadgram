@@ -9,6 +9,12 @@ config/url.py가 urls.py의 최상위 파일이다. 이 파일에서 다른 urls
 
 Django는 요청된 URL 을 조사하여 view 를 선택한다. view는 웹 페이지와 기타 내용들을 제공한다.
 
-### Completed Lecture
 
-~ 50
+
+### django-taggit
+
+a simpler approach to tagging with Django
+
+
+### Completed Lecture
+~ 1- 60

@@ -15,13 +15,12 @@ urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
-    path(
-        "users/",
-        include("Nomadgram.users.urls", namespace="users"),
-    ),
+    path("users/", include("Nomadgram.users.urls", namespace="users"),),
     path("accounts/", include("allauth.urls")),
     # Image management
     path("images/", include("Nomadgram.images.urls", namespace="images"),),
+    # Notifications management
+    path("notifications/", include("Nomadgram.notifications.urls", namespace="notifications"),),
 ] + static(
     settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
 )

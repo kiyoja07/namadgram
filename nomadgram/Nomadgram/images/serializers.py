@@ -2,6 +2,29 @@ from rest_framework import serializers # To translate JSON <-> Python objects
 from . import models
 from Nomadgram.users import models as user_models
 
+
+class SmallImageSerializer(serializers.ModelSerializer):
+
+    """ Used for the notifications """
+
+    class Meta:
+        model=models.Image
+        fields = (
+            'file',
+        )
+
+class CountImageSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=models.Image
+        fields = (
+            'id',
+            'file',
+            'comment_count',
+            'like_count',
+        )
+
+
 # Serializers define the API representation.
 class LikeSerializer(serializers.ModelSerializer):
 
@@ -49,5 +72,6 @@ class ImageSerializer(serializers.ModelSerializer):
             'caption',
             'comments',
             'like_count', 
-            'creator'
+            'creator',
+            'tags',
         )
