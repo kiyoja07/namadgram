@@ -13,7 +13,6 @@ urlpatterns = [
     path('<str:username>', view=views.UserProfile.as_view(), name='user_profile'),
 
 
-
 ]
 
 

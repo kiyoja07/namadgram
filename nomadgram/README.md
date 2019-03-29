@@ -17,4 +17,4 @@ a simpler approach to tagging with Django
 
 
 ### Completed Lecture
-~ 1- 60
+~ 1- 63

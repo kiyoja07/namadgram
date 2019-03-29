@@ -24,6 +24,13 @@ class Feed(APIView):
 
                 image_list.append(image)
 
+        # 내가 생성한 최근 이미지 2개도 피드에 포함
+        my_images = user.images.all()[:2]
+
+        for image in my_images:
+
+            image_list.append(image)
+
         # image.created_at의 역순으로 정렬
         sorted_list = sorted(image_list, key=lambda image: image.created_at, reverse=True)
 
@@ -35,13 +42,13 @@ class Feed(APIView):
 
 class LikeImage(APIView):
 
-    def post(self, request, id, format=None):
+    def post(self, request, image_id, format=None):
 
         user = request.user
 
         # find the image
         try:
-            found_image = models.Image.objects.get(id = id)
+            found_image = models.Image.objects.get(id = image_id)
         except models.Image.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -70,11 +77,11 @@ class LikeImage(APIView):
 
 class UnlikeImage(APIView):
 
-    def delete(self, request, id, format=None):
+    def delete(self, request, image_id, format=None):
 
         # find the image
         try:
-            found_image = models.Image.objects.get(id = id)
+            found_image = models.Image.objects.get(id = image_id)
         except models.Image.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -95,13 +102,13 @@ class UnlikeImage(APIView):
 
 class CommentOnImage(APIView):
 
-    def post(self, request, id, format=None):
+    def post(self, request, image_id, format=None):
 
         user = request.user
 
         # find the image
         try:
-            found_image = models.Image.objects.get(id=id)
+            found_image = models.Image.objects.get(id=image_id)
         except models.Image.DoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -123,13 +130,13 @@ class CommentOnImage(APIView):
 
 class Comment(APIView):
 
-    def delete(self, request, id, format=None):
+    def delete(self, request, comment_id, format=None):
 
         user = request.user
 
         # delete the image
         try:
-            comment = models.Comment.objects.get(id=id, creator=user)
+            comment = models.Comment.objects.get(id=comment_id, creator=user)
             comment.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except models.Comment.DoesNotExist:
@@ -154,6 +161,37 @@ class Search(APIView):
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class ModerateComments(APIView):
+
+    def delete(self, request, image_id, comment_id, format=None):
+
+        user = request.user
+
+        try:
+            comment_to_delete = models.Comment.objects.get(id=comment_id, image__id=image_id, image__creator=user)
+            comment_to_delete.delete()
+        except models.Comment.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ImageDetail(APIView):
+
+    def get(self, request, image_id, format=None):
+
+        user = request.user
+
+        try:
+            image = models.Image.objects.get(id = image_id)
+        except models.Image.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        serializer = serializers.ImageSerializer(image)
+
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 # class ListAllImages(APIView):
