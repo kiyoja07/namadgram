@@ -3,6 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from . import models, serializers
 from Nomadgram.notifications import views as notification_views
+from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
+from rest_auth.registration.views import SocialLoginView
+
 
 
 class ExploreUsers(APIView):
@@ -19,12 +22,12 @@ class ExploreUsers(APIView):
 
 class FollowUser(APIView):
 
-    def post(selfe, request, id, format=None):
+    def post(selfe, request, user_id, format=None):
 
         user = request.user # access the data sent in a POST request
 
         try:
-            user_to_follow = models.User.objects.get(id = id) # 팔로우 할 유저 찾기
+            user_to_follow = models.User.objects.get(id = user_id) # 팔로우 할 유저 찾기
         except models.User.DoesNotExist: # 팔로우할 유저를 찾지 못했을 때
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -42,12 +45,12 @@ class FollowUser(APIView):
 
 class UnFollowUser(APIView):
 
-    def post(selfe, request, id, format=None):
+    def post(selfe, request, user_id, format=None):
 
         user = request.user
 
         try:
-            user_to_follow = models.User.objects.get(id = id) # 언팔로우 할 유저 찾기
+            user_to_follow = models.User.objects.get(id = user_id) # 언팔로우 할 유저 찾기
         except models.User.DoesNotExist: # 언팔로우할 유저를 찾지 못했을 때
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -62,16 +65,53 @@ class UnFollowUser(APIView):
 
 class UserProfile(APIView):
 
-    def get(self, request, username, format=None):
+    def get_user(self, username):
 
         try:
             found_user = models.User.objects.get(username=username)
+            return found_user
         except models.User.DoesNotExist:
+            return None
+
+    def get(self, request, username, format=None):
+
+        found_user = self.get_user(username)
+
+        if found_user is None:
+
             return Response(status=status.HTTP_404_NOT_FOUND)
 
         serializer = serializers.UserProfileSerializer(found_user)
 
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, username, format=None):
+
+        user = request.user
+        found_user = self.get_user(username)
+
+        if found_user is None:
+
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+        elif found_user.username != user.username:
+
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+        else:
+
+            serializer = serializers.UserProfileSerializer(found_user, data=request.data, partial=True)
+
+            if serializer.is_valid():
+
+                serializer.save()
+
+                return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+            else:
+
+                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class UserFollowers(APIView):
@@ -122,6 +162,54 @@ class Search(APIView):
 
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class ChangePassword(APIView):
+
+    def put(self, request, username, format=None):
+
+        user = request.user
+
+        if user.username == username:
+
+            current_password = request.data.get('current_password', None)
+
+            if current_password is not None:
+
+                passwords_match = user.check_password(current_password)
+
+                if passwords_match:
+
+                    new_password = request.data.get('new_password', None)
+
+                    if new_password is not None:
+
+                        user.set_password(new_password)
+
+                        user.save()
+
+                        return Response(status=status.HTTP_200_OK)
+
+                    else:
+
+                        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+                else:
+
+                    return Response(status=status.HTTP_400_BAD_REQUEST)
+
+            else:
+
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
+
+class FacebookLogin(SocialLoginView):
+    adapter_class = FacebookOAuth2Adapter
+
 
 
 # from django.contrib.auth import get_user_model
